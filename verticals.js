@@ -43,9 +43,23 @@
       ],
       seo:{
         label:"Disability benefits guide", heading:"Social Security Disability (SSDI): what to know",
+        factorsHead:"What the SSA reviews",
+        typesHead:"SSDI, SSI, and the appeal path",
         lead:[
           "Social Security Disability Insurance helps people who built up a work history but can no longer earn a living because of a serious medical condition. Eligibility generally depends on your work credits, the severity and expected length of your condition (at least 12 months), and whether you're earning above the SSA's limits. The rules are detailed, and small mistakes on an application are a common reason claims are denied.",
           "Because the process is paperwork-heavy and most first-time claims are denied, many people work with an independent disability representative who handles the filing and any appeals — paid only if the claim is approved, with fees capped by federal law. The Disability Office is a free service that helps you check whether you may qualify and connects you with a representative if you'd like one. We are not the SSA; you can also apply for free at SSA.gov."
+        ],
+        factors:[
+          {h:"Work credits", p:"SSDI is based on having worked and paid Social Security taxes — generally about 5 of the last 10 years."},
+          {h:"Severity & duration", p:"Your condition must seriously limit work activity and last, or be expected to last, at least 12 months."},
+          {h:"Earnings (SGA)", p:"Earning above the SSA's monthly 'substantial gainful activity' limit from working can affect eligibility."},
+          {h:"Ability to do other work", p:"The SSA weighs your age, education, and skills to decide whether you could adjust to different work."}
+        ],
+        types:[
+          {h:"SSDI", p:"For workers who paid into Social Security and can no longer work — based on your earnings record."},
+          {h:"SSI", p:"A need-based program for people with limited income and resources, regardless of work history."},
+          {h:"Back pay", p:"Approved claims often include past-due benefits for the months a claim was pending."},
+          {h:"Appeals", p:"Most first claims are denied; reconsideration and a hearing are where many are ultimately won."}
         ]
       }
     }
