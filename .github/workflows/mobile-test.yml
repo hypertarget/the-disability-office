@@ -1,0 +1,32 @@
+name: Mobile rendering test
+
+# Runs the headless-Chromium mobile harness on every push / PR and on demand.
+# Fails the build if any page has horizontal scroll, off-screen elements,
+# a primary CTA below the fold, or the sticky bar overlapping the form.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  mobile-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install deps
+        run: npm install
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run mobile harness against local files
+        run: node mobile-test.mjs
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-shots
+          path: mobile-shots/
+          retention-days: 14
