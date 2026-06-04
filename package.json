@@ -1,0 +1,16 @@
+{
+  "name": "renue-home",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Renue Home — multi-page home-services brand + conversion site (static + Cloudflare Pages Functions).",
+  "type": "module",
+  "scripts": {
+    "setup": "npm install && npx playwright install chromium",
+    "test:mobile": "node mobile-test.mjs",
+    "test:mobile:live": "node mobile-test.mjs https://renuehome.com",
+    "serve": "node serve.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.60.0"
+  }
+}

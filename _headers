@@ -1,0 +1,18 @@
+# Cloudflare Pages headers. https://developers.cloudflare.com/pages/configuration/headers/
+# Active-development policy: always revalidate so a new deploy is never masked by a
+# stale browser cache. Browsers send a conditional request and get a fast 304 when
+# nothing changed. Before scaling heavy paid traffic, consider switching JS/CSS to
+# hashed filenames with long immutable caching for performance.
+
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Belt-and-suspenders: never cache the shared engine, config, or styles.
+/funnel.js
+  Cache-Control: no-cache
+/verticals.js
+  Cache-Control: no-cache
+/styles.css
+  Cache-Control: no-cache
