@@ -57,7 +57,7 @@
     if(step.helper) return step.helper;
     if(step.type==="zip" || step.type==="address") return "We use this only to match you with a disability representative near you — never shared publicly.";
     if(step.type==="contact") return "Last step — where should we send your free evaluation? Your information is private and secure.";
-    if(idx===0) return "Hi — I’ll help you check if you may qualify in about a minute. It’s free and confidential. Let’s start:";
+    if(idx===0) return "Hi! Let’s see if you may qualify — about a minute:";
     if(idx>=total-2) return "Almost there — just a couple more quick questions.";
     if(step.type==="multi") return "Pick anything that applies, or skip. There are no wrong answers.";
     return "Great — thanks! Next quick question:";
@@ -71,9 +71,10 @@
   /* ===== Header ===== */
   function header(){
     var h=document.createElement("header"); h.className="site";
-    h.innerHTML='<div class="topbar">Not affiliated with the Social Security Administration. A free, private service — <strong>we never charge you a cent</strong>.</div>'+
+    var nav=(window.SITE_VARIANT==="denied")?[["Why denied","#why"],["Appeal odds","#appeals"],["2025 SSA cuts","#cuts"],["FAQ","#faq"]]:NAV;
+    h.innerHTML='<div class="topbar">Not affiliated with the Social Security Administration — a free, private service.</div>'+
       '<div class="wrap bar"><a class="logo" href="/">'+LOGO+'<span class="word"><span class="r">The Disability Office</span><span class="h">A PRIVATE BENEFITS SERVICE</span></span></a>'+
-      '<nav>'+NAV.map(function(n){return '<a class="navlink" href="'+n[1]+'">'+n[0]+'</a>';}).join('')+
+      '<nav>'+nav.map(function(n){return '<a class="navlink" href="'+n[1]+'">'+n[0]+'</a>';}).join('')+
       phoneCTA("phone")+
       '<a class="btn btn-grad" style="padding:12px 20px;font-size:14.5px" href="/#quiz">Free Evaluation</a></nav></div>';
     return h;
@@ -114,12 +115,21 @@
     var city = window.SITE_CITY || null; // {name:"Austin, TX", metro:"Austin", state:"TX"}
 
     var headline = cfg.headline, sub = cfg.sub, title = cfg.title;
-    var eyebrow = 'Free Disability Benefits Evaluation';
-    if(city){
-      headline = cfg.name+' Pros in '+city.metro+', '+city.state;
-      sub = 'Compare free, no-obligation '+cfg.word+' quotes from '+city.metro+'-area professionals serving your area. Takes under a minute.';
-      title = cfg.name+' Quotes in '+city.metro+', '+city.state+' — Satellite Delight';
-      eyebrow = SHIELD+' Serving '+city.metro+' & nearby areas';
+    var variant = (window.SITE_VARIANT==="denied") ? "denied" : "eligibility";
+    var eyebrow, points;
+    if(variant==="denied"){
+      headline = "Denied Social Security Disability? You may have just 60 days to protect what you’re owed.";
+      sub = "About 64% of first-time claims are denied — but a denial is rarely the end. Approval rates jump from roughly 16% at reconsideration to about 50% at the hearing, especially with a representative. The catch: you generally have just 60 days to appeal before you may have to start over. A free review takes about a minute.";
+      title = "Denied Social Security Disability in 2026? Here’s Why — and How to Appeal | The Disability Office";
+      eyebrow = "Denied? You still have options";
+      points = '<li>'+CK+' Free case review — about a minute</li>'+
+               '<li>'+CK+' Representatives paid only if you win (fee capped by law)</li>'+
+               '<li>'+CK+' Help meeting your 60-day appeal deadline</li>';
+    } else {
+      eyebrow = "Free Disability Benefits Evaluation";
+      points = '<li>'+CK+' No upfront cost — representatives are paid only if you win</li>'+
+               '<li>'+CK+' Free, confidential evaluation in about a minute</li>'+
+               '<li>'+CK+' Help with first-time claims and denied appeals</li>';
     }
     document.title = title || ("The Disability Office — "+cfg.name);
 
@@ -129,14 +139,11 @@
           '<span class="eyebrow">'+eyebrow+'</span>'+
           '<h1 class="head">'+headline+'</h1>'+
           '<p class="lead">'+sub+'</p>'+
-          '<ul class="hero-points">'+
-            '<li>'+CK+' No upfront cost — representatives are paid only if you win</li>'+
-            '<li>'+CK+' Free, confidential evaluation in about a minute</li>'+
-            '<li>'+CK+' Help with first-time claims and denied appeals</li>'+
-          '</ul></div></div>'+
+          '<ul class="hero-points">'+points+'</ul></div></div>'+
         '<div class="split-quiz"><div class="inner"><div id="quiz"><div class="card" id="quizcard"></div></div></div></div>'+
       '</section>'+
-      supportHtml(cfg, city);
+      statStrip()+
+      (variant==="denied" ? deniedSupport(cfg) : supportHtml(cfg, city));
 
     RF.active = true; RF.cfg = cfg;
     injectTrustedForm();
@@ -147,6 +154,66 @@
     if(qc) qc.addEventListener("focusin", function(){ document.body.classList.add("quiz-engaged"); });
     wireFaq();
   }
+
+  /* ===== Denied / appeal advertorial (verified figures only) ===== */
+  function deniedSupport(cfg){
+    var cta = function(label){ return '<p class="adcta"><a class="btn btn-grad" href="#quiz">'+(label||'Get my free case review')+' &rsaquo;</a></p>'; };
+    var faqs = (cfg.faqs||[]).map(function(f){ return '<details><summary>'+f.q+'</summary><div class="a">'+f.a+'</div></details>'; }).join('');
+    return ''+
+      '<section id="why"><div class="wrap seo-wrap">'+byline()+
+        '<div class="seclabel">Why claims get denied</div>'+
+        '<h2 class="sec-h">Why your claim was probably denied (and why that’s good news)</h2>'+
+        '<div class="seo-body"><p>Most denials aren’t because you don’t have a real disability — they’re about paperwork and procedure. The most common reasons:</p></div>'+
+        '<div class="ptypes">'+
+          '<div class="ptype">'+CKp()+'<div><strong>Insufficient medical evidence</strong><span>The #1 reason — records that don’t clearly show how your condition stops you from working.</span></div></div>'+
+          '<div class="ptype">'+CKp()+'<div><strong>Filing new instead of appealing</strong><span>A new claim resets the clock and weakens your case. Appealing is almost always the right move.</span></div></div>'+
+          '<div class="ptype">'+CKp()+'<div><strong>Earning over the limit</strong><span>More than the SSA’s “substantial gainful activity” limit ($1,690/mo in 2026) can disqualify you regardless of your condition.</span></div></div>'+
+          '<div class="ptype">'+CKp()+'<div><strong>Condition not matching SSA criteria</strong><span>You can still qualify — it takes the right medical argument tied to the SSA’s “Blue Book.”</span></div></div>'+
+          '<div class="ptype">'+CKp()+'<div><strong>Not enough work credits</strong><span>You may still qualify for SSI; a representative can evaluate both programs.</span></div></div>'+
+        '</div>'+
+        '<p class="seo-body">Good news: every one of these is something a representative can address on appeal.</p>'+cta('Was my denial improper? Get my free review')+
+      '</div></section>'+
+
+      '<section id="appeals" style="background:var(--soft)"><div class="wrap seo-wrap">'+
+        '<div class="seclabel">Where appeals are won</div>'+
+        '<h2 class="sec-h">Approval rates climb sharply on appeal</h2>'+
+        '<table class="adtable"><thead><tr><th>Stage</th><th>Approx. approval</th><th>What it means</th></tr></thead><tbody>'+
+          '<tr><td>Initial application</td><td>~36%</td><td>Most are denied here</td></tr>'+
+          '<tr><td>Reconsideration</td><td>~16%</td><td>The hardest stage — don’t stop</td></tr>'+
+          '<tr class="hot"><td><strong>ALJ hearing</strong></td><td><strong>~50%</strong></td><td><strong>Where approvals outpace denials — and representation matters most</strong></td></tr>'+
+          '<tr><td>Appeals Council</td><td>~1–2%</td><td>Mostly sets up federal court</td></tr>'+
+        '</tbody></table>'+
+        '<p class="seo-body">The hearing stage is where most successful appeals are won — approval jumps from roughly 16% at reconsideration to about half at the hearing (FY2025), and that’s where having a representative makes the biggest measurable difference.</p>'+
+      '</div></section>'+
+
+      '<section id="cuts"><div class="wrap seo-wrap">'+
+        '<div class="seclabel">2025–26 SSA cuts</div>'+
+        '<h2 class="sec-h">What the recent SSA cuts mean for your claim</h2>'+
+        '<div class="seo-body"><p>In 2025 the SSA cut roughly <strong>7,500 employees (about 13% of staff)</strong> — the largest staffing reduction in its history — and reduced field-office service. The result: initial decisions now average <strong>6–8 months</strong>, hearings can take a year or more, and the pending-case backlog keeps growing. Translation: the system is slower and less forgiving than ever, and a missed deadline is harder to recover from. The single most important thing you can do is <strong>not miss your 60-day appeal window.</strong></p></div>'+cta('Protect my appeal deadline')+
+      '</div></section>'+
+
+      '<section style="background:var(--soft)"><div class="wrap seo-wrap">'+
+        '<div class="seclabel">What it could be worth</div>'+
+        '<h2 class="sec-h">How much could you be owed?</h2>'+
+        '<div class="seo-body"><p>If approved, you may receive monthly benefits of <strong>up to $4,152 (2026)</strong> based on your work history — <strong>plus back pay</strong> dating to your eligibility, which can add up to thousands of dollars in a lump sum. (The average SSDI benefit is about $1,630/mo; amounts depend on your record.) A free review is the fastest way to find out what your claim may be worth.</p></div>'+
+      '</div></section>'+
+
+      '<section><div class="wrap seo-wrap">'+
+        '<div class="seclabel">No upfront cost</div>'+
+        '<h2 class="sec-h">How representation changes your odds — at no upfront cost</h2>'+
+        '<div class="seo-body"><p>Disability representatives work on <strong>contingency</strong>: their fee is <strong>capped by federal law</strong> (25% of past-due benefits, up to $9,200) and they’re <strong>paid only if you win</strong>. There is <strong>never an upfront bill to you.</strong> They strengthen your medical evidence, prepare your testimony, meet every deadline, and argue your case at the hearing — exactly where unrepresented claimants tend to lose.</p></div>'+cta('See if a representative can help — free')+
+      '</div></section>'+
+
+      '<section id="faq"><div class="wrap"><div class="center"><div class="seclabel">Questions</div><h2 class="sec-h">Denied SSDI — common questions</h2></div>'+
+        '<div class="faq" style="margin-top:24px">'+faqs+'</div></div></section>'+
+
+      '<section class="ssa-disc"><div class="wrap"><p class="box"><strong>The Disability Office is not the Social Security Administration (SSA) or any government agency,</strong> and is not affiliated with or endorsed by SSA. We are a free, privately owned service that connects people with independent disability representatives. You can apply for benefits and appeal for free, directly with the SSA at SSA.gov. This website does not provide legal advice.</p></div></section>'+
+
+      '<section class="band cta-band"><div class="wrap"><h2 class="sec-h">Was your denial improper? Find out free.</h2>'+
+        '<p class="sec-sub">A free case review takes about a minute — and your 60-day window won’t wait.</p>'+
+        '<a class="btn btn-grad btn-lg" href="#quiz">Start My Free Case Review</a></div></section>';
+  }
+  function CKp(){ return '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'; }
 
   function supportHtml(cfg, city){
     var chk = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
@@ -237,7 +304,7 @@
     var total = steps.length;
     var pctNum = Math.round((idx/total)*100);
     var step = steps[idx];
-    var h = '<div class="progress"><div class="ptrack"><div class="pfill" style="width:'+pctNum+'%"></div></div><div class="pct">Step '+(idx+1)+' of '+total+'</div></div>';
+    var h = '<div class="progress"><div class="ptrack"><div class="pfill" style="width:'+pctNum+'%"></div></div><div class="pct">Step '+(idx+1)+' of '+total+'</div></div><div class="pest">~1 minute left</div>';
     if(idx>0) h += '<button class="back" type="button" data-back="1">&lsaquo; Back</button>';
     h += '<div class="qrow">'+AVATAR+'<div class="qbubble">'+helperFor(step, idx, total)+'</div></div>';
     h += '<div class="q">'+step.q+'</div>'+(step.sub?'<p class="qsub">'+step.sub+'</p>':'');
@@ -259,8 +326,9 @@
          '<div class="field"><input id="f_last" placeholder="Last name" value="'+(data.last||'')+'"></div></div>'+
          '<div class="field"><input id="f_email" type="email" inputmode="email" placeholder="Email address" data-tf-element-role="consent-grantor-email" value="'+(data.email||'')+'"></div>'+
          '<div class="field"><input id="f_phone" type="tel" inputmode="tel" placeholder="Phone number" data-tf-element-role="consent-grantor-phone" value="'+(data.phone||'')+'"></div>'+
-         '<button class="btn btn-grad btn-lg" type="button" data-submit="1" data-tf-element-role="submit">See If I Qualify &rsaquo;</button>'+
-         '<p class="consent" data-tf-element-role="consent-language">By clicking &ldquo;See If I Qualify,&rdquo; I consent to receive <span data-tf-element-role="contact-method">calls, text messages, and emails</span> from <span data-tf-element-role="consent-advertiser-name">The Disability Office and the independent disability advocates, attorneys, and <a href="/partners">marketing partners</a> it works with</span> about Social Security Disability benefits and related services at the phone number and email address I provide, <span data-tf-element-role="consent-grantor-waived-regulated-technologies">including through automated dialing technology, prerecorded messages, and artificial or AI-generated voice</span>, <span data-tf-element-role="consent-grantor-waived-dnc">even if my number is on a federal, state, or internal Do Not Call list</span>. <span data-tf-element-role="consent-grantor-waived-purchase-condition">Consent is not a condition of any purchase or of receiving services</span>. Message and data rates may apply. Message frequency may vary. Reply STOP to opt out of texts. See our <a href="/privacy-policy">Privacy Policy</a> and <a href="/terms-and-conditions">Terms &amp; Conditions</a>.</p>'+
+         '<label class="consentbox" data-tf-element-role="consent-language"><input type="checkbox" id="f_consent"> <span>By checking this box, I agree to be contacted by <span data-tf-element-role="consent-advertiser-name">The Disability Office and the independent disability advocates, attorneys, and <a href="/partners" target="_blank" rel="noopener">marketing partners</a> it works with</span> by <span data-tf-element-role="contact-method">phone call, text message, and email</span> about Social Security Disability benefits and related services at the number and email I provide, <span data-tf-element-role="consent-grantor-waived-regulated-technologies">including through automated dialing technology, prerecorded messages, and artificial or AI-generated voice</span>, <span data-tf-element-role="consent-grantor-waived-dnc">even if my number is on a federal, state, or internal Do-Not-Call list</span>. <span data-tf-element-role="consent-grantor-waived-purchase-condition">Consent is not required to get help and is not a condition of any purchase or services.</span> Message and data rates may apply; reply STOP to opt out. See our <a href="/privacy-policy" target="_blank">Privacy Policy</a> and <a href="/terms-and-conditions" target="_blank">Terms &amp; Conditions</a>.</span></label>'+
+         '<button class="btn btn-grad btn-lg" type="button" data-submit="1" data-tf-element-role="submit" disabled>See If I Qualify &rsaquo;</button>'+
+         '<input type="hidden" id="leadid_token" name="universal_leadid" />'+
          '<p class="consent disclaim">The Disability Office is a free, privately owned referral service. We are not the Social Security Administration (SSA), a government agency, or a law firm, and we are not affiliated with or endorsed by any government agency. Social Security Disability benefits are available for free directly from the SSA at SSA.gov. Submitting this form is not an application for benefits and does not guarantee approval or any particular outcome. If you request a consultation, you may be contacted by an independent attorney or non-attorney advocate.</p>';
     }
 
@@ -300,7 +368,9 @@
       card.querySelector("[data-addr]").onclick=function(){ var el=document.getElementById("f_addr"); var v=(el.value||"").trim(); if(v.length<5){ el.classList.add("bad"); return errEl("Please enter your project address."); } next({address:v}); };
     }
     if(step.type==="contact"){
-      card.querySelector("[data-submit]").onclick=function(btn){ submitContact(cfg, idx, data, this); };
+      var subBtn=card.querySelector("[data-submit]"), cbox=document.getElementById("f_consent");
+      if(cbox&&subBtn) cbox.addEventListener("change", function(){ subBtn.disabled=!cbox.checked; });
+      if(subBtn) subBtn.onclick=function(){ submitContact(cfg, idx, data, this); };
     }
   }
 
@@ -312,12 +382,17 @@
     if(!last){ return err("Please enter your last name.","f_last"); }
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ return err("Please enter a valid email address.","f_email"); }
     if(phone.replace(/\D/g,"").length<10){ return err("Please enter a valid phone number.","f_phone"); }
+    var cbx=document.getElementById("f_consent");
+    if(cbx && !cbx.checked){ return err("Please check the box to agree to be contacted so a representative can reach you."); }
     if(btn.dataset.busy==="1") return; // double-submit guard
     btn.dataset.busy="1"; btn.disabled=true; btn.textContent="Submitting…";
-    var lead = Object.assign({}, data, {first:first,last:last,email:email,phone:phone,vertical:window.SITE_VERTICAL,consent:true,ts:Date.now()});
+    // Qualification gate — don't ping-post obviously unqualified leads (working full-time / already receiving / past retirement age).
+    var dq = (data.work==="No, I'm working full-time") || (data.receiving==="Yes, I already receive benefits") || (data.age==="Over 67");
+    var lead = Object.assign({}, data, {first:first,last:last,email:email,phone:phone,vertical:window.SITE_VERTICAL,variant:(window.SITE_VARIANT||"eligibility"),qualified:!dq,consent:true,ts:Date.now()});
     lead.xxTrustedFormCertUrl = val("xxTrustedFormCertUrl");
     lead.xxTrustedFormPingUrl = val("xxTrustedFormPingUrl");
-    lead.consentText = "By submitting, I consent to receive calls, texts, and emails from The Disability Office and the independent disability advocates, attorneys, and marketing partners it works with (up to "+BUYER_CAP+" companies), including via automated technology and prerecorded/AI voice, even if on a Do Not Call list. Consent is not a condition of purchase or services. Reply STOP to opt out.";
+    lead.universal_leadid = val("leadid_token");
+    lead.consentText = "I agree to be contacted by The Disability Office and the independent disability advocates, attorneys, and marketing partners it works with (up to "+BUYER_CAP+" companies) by phone, text, and email, including via automated dialing technology and prerecorded/AI voice, even if my number is on a Do-Not-Call list. Consent is not required to get help. Reply STOP to opt out.";
     lead.pageUrl = location.href;
     if(window.SITE_CITY) lead.city = window.SITE_CITY.name;
     doSubmit(cfg, lead, btn);
@@ -327,24 +402,103 @@
     var finish=function(callNumber){
       RF.active=false;
       var quiz=document.getElementById("quiz");
-      quiz.innerHTML='<div class="card"><div class="thanks show"><div class="big"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'+
-        '<div class="q">You’re all set'+(lead.first?', '+esc(lead.first):'')+'!</div>'+
-        '<p class="qsub">Your request has been received. A trusted local pro will reach out shortly to discuss your '+cfg.word+' project.</p>'+
-        (callNumber?'<div class="callrow"><a class="btn btn-grad btn-lg" href="'+telHref(callNumber)+'">📞 Call now to speak to a specialist</a></div>':'')+
-        '<div class="trustcues" style="margin-top:16px"><span>Local pros. Free. No obligation.</span></div></div></div>';
-      try{ if(window.gtag) gtag('event','generate_lead',{items:[{item_category:window.SITE_VERTICAL}]}); }catch(e){}
-      try{ if(window.fbq) fbq('track','Lead'); }catch(e){}
+      var nm=lead.first?', '+esc(lead.first):'';
+      var html;
+      if(lead.qualified){
+        html='<div class="thanks show"><div class="big"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'+
+          '<div class="q">Good news'+nm+' — you may qualify.</div>'+
+          '<p class="qsub">Your free review request is in. An independent disability representative will call you shortly to go over your options. There’s no cost unless you win.</p>'+
+          (callNumber?'<div class="callrow"><a class="btn btn-grad btn-lg" href="'+telHref(callNumber)+'">📞 Prefer to talk now? Call a representative</a></div>':'')+
+          '<div class="trustcues" style="margin-top:16px"><span>Free &amp; confidential · No obligation · Not the SSA</span></div></div>';
+      } else {
+        html='<div class="thanks show"><div class="big" style="background:var(--accent)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/></svg></div>'+
+          '<div class="q">Thanks'+nm+' — let’s point you the right way.</div>'+
+          '<p class="qsub">Based on your answers, a standard SSDI claim may not be the best fit right now. You may still have options — for example <strong>SSI</strong>, a need-based program, or reapplying later. You can review your options and apply for free directly with the SSA at <a href="https://www.ssa.gov" target="_blank" rel="nofollow noopener">SSA.gov</a>.</p>'+
+          '<div class="trustcues" style="margin-top:16px"><span>The Disability Office is a free service and is not the SSA.</span></div></div>';
+      }
+      quiz.innerHTML='<div class="card">'+html+'</div>';
+      try{ if(window.dataLayer) window.dataLayer.push({event:'lead_submit', qualified:!!lead.qualified, variant:lead.variant}); }catch(e){}
+      try{ if(window.gtag && lead.qualified) gtag('event','generate_lead',{items:[{item_category:window.SITE_VERTICAL}]}); }catch(e){}
+      try{ if(window.fbq && lead.qualified) fbq('track','Lead'); }catch(e){}
       window.scrollTo({top:0,behavior:"smooth"});
     };
     var fail=function(){
       var e=document.getElementById("err");
       if(e) e.textContent="Sorry — something went wrong submitting your request. Please try again.";
-      if(btn){ btn.disabled=false; btn.dataset.busy=""; btn.textContent="Get My Free Quote ›"; }
+      if(btn){ btn.disabled=false; btn.dataset.busy=""; btn.textContent="See If I Qualify ›"; }
     };
     fetch(SUBMIT_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(lead)})
       .then(function(r){ if(!r.ok) throw new Error("bad status"); return r.json(); })
       .then(function(j){ finish(j&&j.callNumber?j.callNumber:PHONE_NUMBER); })
       .catch(fail);
+  }
+
+  /* ===== Conversion chrome: urgency banner, stat strip, byline, exit-intent ===== */
+  /* All figures are sourced/verified (FY2025 SSA data + 2026 COLA). Do not edit to unverified numbers. */
+  var STATS = [
+    {n:"~64%", l:"of first-time SSDI claims are denied"},
+    {n:"~84%", l:"of reconsideration appeals are denied"},
+    {n:"~50%", l:"approved at the ALJ hearing stage — higher with representation"},
+    {n:"$4,152", l:"max monthly benefit in 2026 (avg ~$1,630)"},
+    {n:"60 days", l:"to appeal each denial — don't miss it"},
+    {n:"6–8 mo.", l:"average wait for an initial decision"}
+  ];
+  function statStrip(){
+    return '<section class="stats"><div class="wrap"><div class="statgrid">'+
+      STATS.map(function(s){return '<div class="stat"><div class="sn">'+s.n+'</div><div class="sl">'+s.l+'</div></div>';}).join('')+
+      '</div><p class="statsrc">Sources: SSA FY2025 disability data &amp; 2026 COLA fact sheet. The Disability Office is not the SSA.</p></div></section>';
+  }
+  function byline(){
+    return '<p class="byline">By <strong>The Disability Office Editorial Team</strong> &middot; Reviewed for accuracy &middot; Last updated June 2026</p>';
+  }
+  function urgencyBanner(){
+    if(sessionStorage.getItem("rf_banner_x")==="1") return null;
+    var b=document.createElement("div"); b.className="ubanner";
+    b.innerHTML='<div class="wrap ubar"><span class="utext"><strong>SSA cuts have pushed disability waits to 6–8 months</strong> — and a denial gives you just 60 days to appeal. See what you may be owed — free, in about a minute.</span>'+
+      '<a class="ucta" href="#quiz">Check Now →</a><button class="ux" type="button" aria-label="Dismiss">×</button></div>';
+    b.querySelector(".ux").onclick=function(){ try{sessionStorage.setItem("rf_banner_x","1");}catch(e){} b.remove(); };
+    return b;
+  }
+  /* Jornaya/LeadiD — second consent certificate. Off unless window.SITE_JORNAYA_CAMPAIGN is set. */
+  function injectJornaya(){
+    var camp = window.SITE_JORNAYA_CAMPAIGN; if(!camp || window.__rf_jornaya) return; window.__rf_jornaya=true;
+    try{
+      var s=document.createElement("script"); s.id="LeadiDscript_campaign"; s.type="text/javascript"; s.async=true;
+      s.src="//create.lidstatic.com/campaign/"+camp+".js?snippet_version=2";
+      var f=document.getElementsByTagName("script")[0]; f.parentNode.insertBefore(s,f);
+    }catch(e){}
+  }
+  /* Exit-intent / abandonment recovery: capture a callback number with explicit consent. */
+  function exitIntent(){
+    if(sessionStorage.getItem("rf_exit")==="1") return;
+    var shown=false;
+    var show=function(){
+      if(shown || document.body.classList.contains("quiz-engaged")) return; shown=true;
+      try{sessionStorage.setItem("rf_exit","1");}catch(e){}
+      var o=document.createElement("div"); o.className="exitmodal";
+      o.innerHTML='<div class="exitcard"><button class="exitx" type="button" aria-label="Close">×</button>'+
+        '<h3>Before you go — don’t lose your appeal window</h3>'+
+        '<p>Leave your number and an independent representative can call you for a free review. No cost, no obligation.</p>'+
+        '<div class="field"><input id="ex_phone" type="tel" inputmode="tel" placeholder="Your phone number"></div>'+
+        '<label class="exconsent"><input type="checkbox" id="ex_consent"> <span>I agree to be contacted by The Disability Office and the independent representatives &amp; <a href="/partners" target="_blank" rel="noopener">marketing partners</a> it works with by phone, text, and email (including autodialed/prerecorded/AI voice), even if on a Do-Not-Call list. Consent isn’t required to get help. Reply STOP to opt out.</span></label>'+
+        '<button class="btn btn-grad btn-lg" id="ex_go" type="button">Have a representative call me</button>'+
+        '<p class="exfine">You can also apply free at SSA.gov. We are not the SSA.</p></div>';
+      document.body.appendChild(o);
+      var close=function(){ o.remove(); };
+      o.querySelector(".exitx").onclick=close; o.onclick=function(e){ if(e.target===o) close(); };
+      o.querySelector("#ex_go").onclick=function(){
+        var p=(document.getElementById("ex_phone").value||"").replace(/\D/g,"");
+        if(p.length<10){ document.getElementById("ex_phone").classList.add("bad"); return; }
+        if(!document.getElementById("ex_consent").checked){ document.getElementById("ex_consent").parentNode.style.color="#b5512f"; return; }
+        var lead={phone:p,source:"exit-intent",vertical:window.SITE_VERTICAL,variant:window.SITE_VARIANT||"eligibility",consent:true,ts:Date.now(),pageUrl:location.href,xxTrustedFormCertUrl:val("xxTrustedFormCertUrl")};
+        try{ fetch(SUBMIT_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(lead)}); }catch(e){}
+        try{ if(window.fbq) fbq('track','Lead',{source:'exit_intent'}); }catch(e){}
+        o.querySelector(".exitcard").innerHTML='<button class="exitx" type="button" aria-label="Close">×</button><h3>Thank you — you’re on the list.</h3><p>An independent representative will reach out shortly for your free review.</p>';
+        o.querySelector(".exitx").onclick=close;
+      };
+    };
+    document.addEventListener("mouseout", function(e){ if(e.clientY<=0 && !e.relatedTarget) show(); });
+    setTimeout(function(){ if(window.matchMedia && window.matchMedia("(max-width:780px)").matches) show(); }, 30000);
   }
 
   function wireFaq(){ /* native <details>; nothing needed */ }
@@ -354,9 +508,11 @@
   /* ===== Boot ===== */
   function boot(){
     document.body.insertBefore(header(), document.body.firstChild);
+    var ub=urgencyBanner(); if(ub) document.body.insertBefore(ub, document.body.firstChild);
     if(window.SITE_PAGE==="vertical") buildVertical();
     document.body.appendChild(footer());
     document.body.appendChild(sticky());
+    injectJornaya(); exitIntent();
     window.addEventListener("popstate", function(e){
       if(!RF.active || !RF.cfg) return;
       var t = (e.state && typeof e.state.rf === "number") ? e.state.rf : null;
