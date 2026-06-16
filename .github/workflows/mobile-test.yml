@@ -24,9 +24,9 @@ jobs:
       - name: Run mobile harness against local files
         run: node mobile-test.mjs
       - name: Upload screenshots
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: mobile-shots
           path: mobile-shots/
-          retention-days: 14
+        retention-days: 1
